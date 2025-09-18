@@ -8,7 +8,7 @@ export type Cat = {
 }
 
 export default function cataas() {
-    async function fetchCats(limit: number = 3) {
+    async function fetchCats(limit: number = 7) {
         const json = Array.from({ length: limit }, () =>  
            fetch(`https://cataas.com/cat?json=true`).then((res) => res.json())
         );
