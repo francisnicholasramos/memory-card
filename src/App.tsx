@@ -4,7 +4,13 @@ import Main from './components/Main'
 import ScoreBoard from './components/ScoreBoard'
 import type { Cat } from './cataas'
 import cataas from './cataas'
+import dance from './assets/dance.gif';
+import laughing from './assets/laughing.gif';
 
+const images = {
+    win: dance,
+    lose: laughing,
+}
 
 const App = () => {
     const [cats, setCats] = useState<Cat[]>([]);
@@ -15,6 +21,10 @@ const App = () => {
         return current ? JSON.parse(current) : 0;
     }); 
 
+    const [message, setMessage] = useState('')
+    const [image, setImage] = useState('')
+    const [modal, setModal] = useState(false);
+
 
     // load cats
     useEffect(() => {
@@ -23,9 +33,13 @@ const App = () => {
     }, []);
 
     useEffect(() => {
+        setModal(true) // disable modal initially 
+        
         const duplicate = cats.find((cat) => cat.clickCount >= 2);
         if (duplicate) {
-            alert(`Duplicate clicks goes to ID: ${duplicate.id}`)
+            setMessage('You Lose! You clicked twice!')
+            setModal(false)
+            setImage(images.lose)
             setBestScore(JSON.parse(localStorage.getItem('currentBest') || ''))
             return;
         }     
@@ -34,8 +48,9 @@ const App = () => {
         setScore(newScore);
 
         if (cats.every(cat => cat.clickCount === 1)) {
-            console.log('You win')
-
+            setMessage('You win!')
+            setModal(false)
+            setImage(images.win)
             const currentBest = JSON.parse(localStorage.getItem('currentBest') || '0');
 
             if (newScore > currentBest) {
@@ -101,10 +116,12 @@ const App = () => {
 
     };
 
+    const onClose = () => setModal(true)
+
     // useEffect(() => {console.log(cats)}, [cats])
 
     return (
-        <div className="flex flex-col border relative justify-center items-center h-screen w-screen">
+        <div className="flex flex-col border relative justify-center items-center">
             <ScoreBoard 
                 score={score}
                 bestScore={bestScore}
@@ -116,7 +133,12 @@ const App = () => {
                 onBlur={onBlur}
             />
 
-            <Modal />
+            <Modal 
+                message={message}
+                image={image}
+                onOpen={modal}
+                onClose={onClose}
+            />
             
         </div>
     )
