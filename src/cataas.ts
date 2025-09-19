@@ -8,7 +8,7 @@ export type Cat = {
 }
 
 export default function cataas() {
-    async function fetchCats(limit: number = 7) {
+    async function fetchCats(limit: number = 5) {
         const json = Array.from({ length: limit }, () =>  
            fetch(`https://cataas.com/cat?json=true`).then((res) => res.json())
         );
@@ -21,8 +21,8 @@ export default function cataas() {
        return modifiedJson;
     }
 
-    async function getCats(): Promise<Cat[]> {
-        const data = await fetchCats();
+    async function getCats(limit: number = 5): Promise<Cat[]> {
+        const data = await fetchCats(limit);
         const arr: Cat[] = [];
 
         arr.push(...data);

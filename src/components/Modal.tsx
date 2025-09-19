@@ -1,7 +1,14 @@
-import {Button, Image} from '@heroui/react';
+import {Button} from '@heroui/react';
 
-const Modal = ({onOpen, onClose, image, message} : 
-    {onOpen: boolean, image: string, onClose: () => void, message: string}) => {
+const Modal = ({onOpen, onClose, image, message, text, btnColor, shadowColor} : 
+    {onOpen: boolean, 
+     image: string, 
+     onClose: () => void, 
+     message: string, 
+     text: string, 
+     btnColor: 'primary' | 'danger',
+     shadowColor: string
+}) => {
 
     const btnSize = () => {
         if (window.innerWidth < 640) return "sm";  
@@ -9,50 +16,36 @@ const Modal = ({onOpen, onClose, image, message} :
         return "md";
     }
 
-    const width = () => {
-        if (typeof window !== 'undefined') {
-            if (window.innerWidth < 640) return 280; // mobile
-            if (window.innerWidth < 768) return 320; // small tablet
-            if (window.innerWidth < 1024) return 400; // tablet
-            return 450; // desktop
-        }
-        return 320; // fallback
-    };
-
-    const height = () => {
-        if (typeof window !== 'undefined') {
-            if (window.innerWidth < 640) return 180; // mobile
-            if (window.innerWidth < 768) return 200; // small tablet  
-            if (window.innerWidth < 1024) return 250; // tablet
-            return 280; // desktop
-        }
-        return 200; // fallback
-    };
-
     return (
         <div 
             className={`
-            absolute z-10 p-4 flex flex-col border rounded-lg bg-white 
-            w-[300px] sm:w-[300px] md:w-[450px]
-            h-[300px] sm:h-[300px] md:h-[400px]  
-            ${onOpen ? 'invisible' : 'visible'}`} 
+                fixed inset-0 z-50 flex justify-center items-center
+                ${onOpen ? 'visible' : 'invisible'}
+            `}
         >
-            <div className="flex items-center justify-center">
-                <h2 className="text-xl text-center">{message}</h2>
-            </div>
+            {/* Background overlay */}
+            <div 
+                className="absolute inset-0 bg-opacity-50"
+            />
 
-            <div className="flex p-1 justify-center h-full w-full">
-                <Image
-                    src={image || undefined}
-                    width={width()}
-                    height={height()}
-                    className="object-cover rounded-md h-full w-ful"
-                />
-            </div>
-
-            <div className="flex justify-end gap-4 p-3 ">
-                {/** <Button radius="sm" size={btnSize()} color="default" className="">Cancel</Button> **/}
-                <Button radius="sm" size={btnSize()} color="primary" onClick={onClose}>Ok</Button>
+            <div 
+                className={`
+                    relative z-10 gap-2 p-2 flex flex-col justify-between items-center 
+                    shadow-xl drop-shadow-xl rounded-lg bg-white shadow-[${shadowColor}] 
+                    w-[300px] sm:w-[300px] md:w-[450px]
+                    h-[300px] sm:h-[300px] md:h-[400px]  
+                    bg-cover bg-center 
+                `} 
+                style={{
+                    backgroundImage: `url(${image})`
+                }}
+            >
+                <h2 className="text-xl text-center p-2 rounded-md bg-white">{message}</h2>
+                <div className="flex justify-end">
+                    <Button radius="sm" size={btnSize()} color={btnColor} onClick={onClose}>
+                        {text}
+                    </Button>
+                </div>
             </div>
         </div>
     )

@@ -39,7 +39,7 @@ const Card = ({
                         flex flex-col rounded-lg  cursor-pointer 
                         hover:shadow-[#7594bd]
 
-                        w-[150px] xs:w-[180px] sm:w-[220px] md:w-[280px] lg:w-[300px]                        
+                        w-[160px] sm:w-[220px] md:w-[280px] lg:w-[300px]                        
         `}>
             <Image 
                 src={image}

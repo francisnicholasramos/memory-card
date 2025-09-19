@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import Modal from './components/Modal'
 import Main from './components/Main'
-import ScoreBoard from './components/ScoreBoard'
+import Header from './components/Header'
 import type { Cat } from './cataas'
 import cataas from './cataas'
+import audio from './audio'
+import cat_laughing from './assets/cat_laughing.mp3'
+import yehey from './assets/yehey.mp3'
 import dance from './assets/dance.gif';
 import laughing from './assets/laughing.gif';
 
@@ -16,29 +19,37 @@ const App = () => {
     const [cats, setCats] = useState<Cat[]>([]);
     const [onBlur, setOnBlur] = useState(false);
     const [score, setScore] = useState(0); 
+    const [message, setMessage] = useState('')
+    const [image, setImage] = useState('')
+    const [textButton, setTextButton] = useState('');
+    const [shadowColor, setShadowColor] = useState('')
+    const [opacity, setOpacity] = useState(false)
+    const [btnColor, setBtnColor] = useState<'primary'|'danger'>('primary');
+    const [modal, setModal] = useState(false);
+    const [selectedValue, setSelectedValue] = useState<number>(5)
     const [bestScore, setBestScore] = useState(() => {
         const current = localStorage.getItem('currentBest');
         return current ? JSON.parse(current) : 0;
     }); 
 
-    const [message, setMessage] = useState('')
-    const [image, setImage] = useState('')
-    const [modal, setModal] = useState(false);
-
-
     // load cats
     useEffect(() => {
         const {getCats} = cataas();
-        getCats().then(setCats)
+        getCats(Number(selectedValue)).then(setCats);
     }, []);
 
     useEffect(() => {
-        setModal(true) // disable modal initially 
+        if (cats.length === 0) return; // disable modal initially
         
         const duplicate = cats.find((cat) => cat.clickCount >= 2);
         if (duplicate) {
-            setMessage('You Lose! You clicked twice!')
-            setModal(false)
+            audio(cat_laughing)
+            setMessage('You Lose!')
+            setTextButton('Try again')
+            setBtnColor('danger')
+            setShadowColor('#ff9999')
+            setModal(true)
+            setOpacity(true)
             setImage(images.lose)
             setBestScore(JSON.parse(localStorage.getItem('currentBest') || ''))
             return;
@@ -48,8 +59,13 @@ const App = () => {
         setScore(newScore);
 
         if (cats.every(cat => cat.clickCount === 1)) {
+            audio(yehey)
             setMessage('You win!')
-            setModal(false)
+            setTextButton('Ok')
+            setBtnColor('primary')
+            setShadowColor('#7594bd')
+            setModal(true)
+            setOpacity(true)
             setImage(images.win)
             const currentBest = JSON.parse(localStorage.getItem('currentBest') || '0');
 
@@ -59,12 +75,6 @@ const App = () => {
 
             setBestScore(JSON.parse(localStorage.getItem('currentBest') || '0'))
         }
-
-        cats.forEach((cat) => {
-            if (cat.clickCount.toString().includes('1')) {
-                setScore(score+1);
-            }
-        }) 
 
     }, [cats])
 
@@ -101,6 +111,11 @@ const App = () => {
         return arr;
     }
 
+    const selectLevel = (cardCount: number) => {
+        const {getCats} = cataas();
+        getCats(cardCount).then(setCats)
+    }
+
     const onClick = (id: string) => {
         setOnBlur(true)
 
@@ -116,30 +131,46 @@ const App = () => {
 
     };
 
-    const onClose = () => setModal(true)
+    const onClose = () => {
+        const {getCats} = cataas();
+        getCats(selectedValue).then(setCats)
+        setModal(false)
+        setScore(0)
+        setOpacity(false)
+    }
 
-    // useEffect(() => {console.log(cats)}, [cats])
+    useEffect(() => {console.log('selectedValue: ',selectedValue)}, [selectedValue])
 
     return (
-        <div className="flex flex-col border relative justify-center items-center">
-            <ScoreBoard 
-                score={score}
-                bestScore={bestScore}
-            />
+        <div className="flex flex-col h-full relative items-center pb-10">
+            <div className="w-full">
+                <Header 
+                    score={score}
+                    bestScore={bestScore}
+                    selectedValue={selectedValue}
+                    onChange={(value) => {
+                        setSelectedValue(value);
+                        selectLevel(value)
+                    }}
+                />
 
-            <Main
-                cats={cats}
-                onClick={onClick}
-                onBlur={onBlur}
-            />
+                <Main
+                    cats={cats}
+                    onClick={onClick}
+                    onBlur={onBlur}
+                    opacity={opacity}
+                />
 
-            <Modal 
-                message={message}
-                image={image}
-                onOpen={modal}
-                onClose={onClose}
-            />
-            
+                <Modal 
+                    message={message}
+                    image={image}
+                    onOpen={modal}
+                    onClose={onClose}
+                    text={textButton}
+                    btnColor={btnColor}
+                    shadowColor={shadowColor}
+                />
+            </div>
         </div>
     )
 }
